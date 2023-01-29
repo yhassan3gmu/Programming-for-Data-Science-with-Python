@@ -1,0 +1,139 @@
+﻿--Yasin Hassan
+--2/20/2020                                
+--SQL Code
+--
+--
+--1. Find the total rental count for each family-friendly category (“Workspace + Question Set #1”, n.d.).
+
+
+WITH t1 AS (
+	SELECT
+        	f.title film_title,
+        	c.name category_name,
+        	count(r.rental_id) rental_count
+        FROM
+        	rental r
+        	JOIN inventory i ON r.inventory_id = i.inventory_id
+        	JOIN film f ON i.film_id = f.film_id
+        	JOIN film_category fc ON f.film_id = fc.film_id
+        	JOIN category c ON fc.category_id = c.category_id
+        WHERE 
+		c.name IN ('Family', 'Children', 'Animation', 'Classics','Comedy','Music')
+        GROUP BY 
+		film_title, category_name
+)
+SELECT 
+	category_name, 
+	SUM(rental_count) 
+FROM 
+	t1
+GROUP BY 
+	category_name;
+
+
+--2.  What is the number of rentals per standard quartile (“Workspace + Question Set #1”, n.d.)?
+
+
+WITH t1 AS (
+	SELECT 
+		f.title title, 
+		c.name, 
+		f.rental_duration,
+		NTILE(4) OVER (ORDER BY f.rental_duration) standard_quartile
+	FROM 
+		film f 
+		JOIN film_category fc ON f.film_id = fc.film_id 
+		JOIN category c ON fc.category_id = c.category_id
+	WHERE 
+		c.name IN ('Family', 'Children', 'Animation', 'Classics','Comedy','Music')
+)
+SELECT 
+	standard_quartile, 
+	COUNT(title)
+FROM 
+	t1
+GROUP BY 
+	standard_quartile
+ORDER BY 
+	standard_quartile;  
+
+
+--3. What is the count of rentals for each standard quartile in each family-friendly category (“Workspace + Question Set #1”, n.d.)?
+
+WITH t1 AS (
+	SELECT 
+		c.name AS name,
+		f.rental_duration AS rental_duration,
+		NTILE(4) OVER (ORDER BY f.rental_duration) standard_quartile            
+	FROM 
+		film f 
+		JOIN film_category fc ON f.film_id = fc.film_id 
+		JOIN category c ON fc.category_id = c.category_id 
+	WHERE 
+		c.name IN ('Family', 'Children', 'Animation', 'Classics','Comedy','Music')
+)
+SELECT 
+	name,
+	standard_quartile,
+	COUNT(rental_duration) count,
+	standard_quartile 
+FROM 
+	t1
+GROUP BY 
+	1,2 
+ORDER BY 
+	1,2;
+
+
+--4. What is the rental count for each store for each rental period (“Workspace + Question Set #1”, n.d.)?
+
+SELECT 
+	DATE_PART('month',r.rental_date) rental_month,
+	DATE_PART('year',r.rental_date) rental_year,
+	s.store_id store_id,
+	COUNT(r.rental_id) count_rentals
+FROM 
+	store s 
+	JOIN staff st ON s.store_id = st.store_id 
+	JOIN rental r ON st.staff_id = r.staff_id
+GROUP BY 
+	1, 2, 3
+ORDER BY 
+	4 DESC;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+References
+Workspace + Question Set #1 . (n.d.). Udacity. Retrieved February 13, 2021, from   https://classroom.udacity.com/nanodegrees/nd104/parts/1954dd2c-6bfd-4d92-b59b-40d6dd298f24/modules/77307de7-4b81-4ff7-a338-53f825738b71/lessons/3dc22711-adb9-4e58-a299-fc89bce79d86/concepts/45f09540-1a6b-4e7f-8ef4-4a20487f5c1b
+Workspace + Question Set #2 . (n.d.). Udacity. Retrieved February 13, 2021, from https://classroom.udacity.com/nanodegrees/nd104/parts/1954dd2c-6bfd-4d92-b59b-40d6dd298f24/modules/77307de7-4b81-4ff7-a338-53f825738b71/lessons/3dc22711-adb9-4e58-a299-fc89bce79d86/concepts/45f09540-1a6b-4e7f-8ef4-4a20487f5c1b
