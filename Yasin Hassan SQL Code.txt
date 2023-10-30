@@ -3,7 +3,7 @@
 --SQL Code
 --
 --
---1. Find the total rental count for each family-friendly category (“Workspace + Question Set #1”, n.d.).
+--1. Find the total rental count of videos for each family-friendly category (“Workspace + Question Set #1”, n.d.).
 
 
 WITH t1 AS (
